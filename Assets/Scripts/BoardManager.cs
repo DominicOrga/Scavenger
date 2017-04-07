@@ -91,7 +91,7 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    void SetupScene (int level)
+    public void SetupScene (int level)
     {
         BoardSetup ();
         InitializeList ();
