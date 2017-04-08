@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class MovingObject : MonoBehaviour {
-
+public abstract class MovingObject : MonoBehaviour
+{
     public float movePerSecond = 10f;
     public LayerMask blockingLayer;
 
@@ -11,7 +11,8 @@ public abstract class MovingObject : MonoBehaviour {
     private Rigidbody2D rigidbody;
 
 	// Use this for initialization
-	public virtual void Start () {
+	protected virtual void Start ()
+    {
         boxCollider = GetComponent <BoxCollider2D>();
         rigidbody = GetComponent <Rigidbody2D>();
 	}
@@ -27,7 +28,7 @@ public abstract class MovingObject : MonoBehaviour {
 
         if (hit.transform == null)
         {
-            StartCoroutine (SmoothMovement (end));
+            StartCoroutine(SmoothMovement(end));
             return true;
         }
 
@@ -38,7 +39,7 @@ public abstract class MovingObject : MonoBehaviour {
     {
         float sqrRemainingDistance = (transform.position - end).sqrMagnitude;
 
-        while (sqrRemainingDistance > 0)
+        while (sqrRemainingDistance > float.Epsilon)
         {
             Vector3 newPosition = Vector3.MoveTowards(rigidbody.position, end, movePerSecond * Time.deltaTime);
             rigidbody.MovePosition(newPosition);
@@ -54,7 +55,7 @@ public abstract class MovingObject : MonoBehaviour {
 
         bool canMove = Move(xDir, yDir, out hit);
 
-        if (hit.transform == null)
+        if (canMove)
         {
             return;
         }
@@ -69,9 +70,4 @@ public abstract class MovingObject : MonoBehaviour {
 
     protected abstract void OnCantMove <T>(T component)
         where T : Component;
-
-    // Update is called once per frame
-    void Update () {
-		
-	}
 }
