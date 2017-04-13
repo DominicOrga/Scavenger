@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class Player : MovingObject
 {
@@ -10,6 +11,7 @@ public class Player : MovingObject
     public int pointsPerFood = 10;
     public int pointsPerSoda = 20;
     public float restartLevelDelay = 1f;
+    public Text foodText;
 
     private Animator animator;
     private int food;
@@ -18,6 +20,7 @@ public class Player : MovingObject
     {
         animator.SetTrigger("playerHit");
         food -= loss;
+        foodText.text = " Food: " + food;
         CheckIfGameOver();
     }
    
@@ -41,10 +44,10 @@ public class Player : MovingObject
         int horizontal = 0;
         int vertical = 0;
 
-        horizontal = (int) Input.GetAxis("Horizontal");
-        vertical = (int) Input.GetAxis("Vertical");
+        horizontal = (int) Input.GetAxisRaw("Horizontal");
+        vertical = (int) Input.GetAxisRaw("Vertical");
 
-        // Strictly move as either horizontal or vertical, but not diagonal.
+        // Strictly move as either horizontal or vertical, but not diagonal.     
         if (horizontal != 0)
         {
             vertical = 0;
@@ -62,12 +65,20 @@ public class Player : MovingObject
         GameManager.instance.playersTurn = false;
 
         food--;
+
+        foodText.text = "Food : " + food;
         CheckIfGameOver();
     }
 
     protected override void OnCantMove<T>(T component)
     {
         Wall hitWall = component as Wall;
+
+        if (hitWall == null)
+        {
+            return;
+        }
+
         hitWall.DamageWall(wallDmg);
         animator.SetTrigger("playerChop");
     }
@@ -75,8 +86,8 @@ public class Player : MovingObject
     // Call when player reaches exit in order to move to the next level.
     private void Restart ()
     {
-        // Application.LoadLevel(Application.loadedLevel); deprecated
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        //Application.LoadLevel(Application.loadedLevel); // deprecated
+        SceneManager.LoadScene(0);
     }
 
     private void OnDisable ()
@@ -87,9 +98,7 @@ public class Player : MovingObject
     private void CheckIfGameOver ()
     {
         if (food <= 0)
-        {
-            GameManager.instance.gameOver ();
-        }
+            GameManager.instance.GameOver ();
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -97,16 +106,18 @@ public class Player : MovingObject
         if (collision.tag == "Exit")
         {
             Invoke("Restart", restartLevelDelay);
-            enabled = false;
+            enabled  = false;
         }
         else if (collision.tag == "Food")
         {
             food += pointsPerFood;
+            foodText.text = "+ " + pointsPerFood + " Food: " + food;
             collision.gameObject.SetActive(false);
         }
         else if (collision.tag == "Soda")
         {
             food += pointsPerSoda;
+            foodText.text = "+ " + pointsPerSoda + " Food: " + food;
             collision.gameObject.SetActive(false);
         }
     }
